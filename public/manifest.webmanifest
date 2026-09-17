@@ -1,0 +1,19 @@
+{
+  "name": "CampusConnect - Zero-Knowledge Secret Crush",
+  "short_name": "CampusConnect",
+  "description": "Privacy-first, double-blind encrypted college secret crush platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0F1D",
+  "theme_color": "#0A0F1D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "lifestyle", "campus"]
+}

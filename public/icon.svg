@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="50%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#0A0F1D"/>
+    </linearGradient>
+    <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F43F5E"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Shield -->
+  <path d="M256 32L64 112V240C64 360 148 468 256 496C364 468 448 360 448 240V112L256 32Z" fill="url(#shieldGrad)" stroke="url(#neonGlow)" stroke-width="12" stroke-linejoin="round"/>
+  <!-- Inner Heart Lock -->
+  <path d="M256 370C256 370 170 310 170 230C170 190 200 160 238 160C256 160 274 172 284 186C294 172 312 160 330 160C368 160 398 190 398 230C398 310 312 370 312 370L284 394L256 370Z" fill="url(#heartGrad)" opacity="0.9"/>
+  <!-- Keyhole Lock symbol -->
+  <circle cx="284" cy="240" r="18" fill="#0A0F1D"/>
+  <path d="M280 248L276 280H292L288 248Z" fill="#0A0F1D"/>
+</svg>

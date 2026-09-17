@@ -1,0 +1,103 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model College {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  shortCode   String   @unique // e.g., "DU_SRCC", "IIT_DELHI", "BITS_PILANI"
+  domain      String?  // e.g., "srcc.du.ac.in", "iitd.ac.in"
+  city        String
+  state       String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  users       User[]
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  collegeId            String
+  college              College           @relation(fields: [collegeId], references: [id])
+  
+  // Blind identity hash: HMAC(KMS_PEPPER, Phone_E164)
+  identityHash         String            @unique
+  
+  // Masked phone for display only: "+91 98****3210"
+  maskedPhone          String
+  
+  // Optional verified Instagram handle hash
+  instagramHash        String?           @unique
+  maskedInstagram      String?
+  
+  // Verification and access quotas
+  // Statuses: 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED'
+  verificationStatus   String            @default("PENDING_VERIFICATION")
+  eduEmail             String?           @unique
+  crushSlotsTotal      Int               @default(3) // 3 free default slots
+  crushSlotsUsed       Int               @default(0)
+  
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  
+  commitments          CrushCommitment[]
+  payments             PaymentOrder[]
+}
+
+model CrushCommitment {
+  id                   String      @id @default(uuid())
+  userId               String
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Commutative rendezvous token = HMAC(KMS_PAIR, sort(U_A, U_B))
+  rendezvousToken      String
+  
+  // Directional proof = HMAC(KMS_DIR, U_initiator -> U_target)
+  directionalHash      String      @unique
+  
+  // Masked target for User's own dashboard display (e.g. "@a***a_eco")
+  maskedTargetHint     String
+  
+  // Statuses: 'WAITING_FOR_PAIR' | 'MUTUAL_MATCH' | 'UNMATCHED'
+  status               String      @default("WAITING_FOR_PAIR")
+  matchedAt            DateTime?
+  
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  
+  messages             EphemeralMessage[]
+}
+
+model PaymentOrder {
+  id               String        @id @default(uuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  
+  orderId          String        @unique // Razorpay / Cashfree order_id
+  paymentId        String?       @unique // Razorpay payment_id (upon webhook confirmation)
+  amountPaise      Int           @default(1000) // ₹10.00 = 1000 paise
+  currency         String        @default("INR")
+  
+  // Statuses: 'INITIATED' | 'SUCCESS' | 'FAILED' | 'REFUNDED'
+  status           String        @default("INITIATED")
+  
+  slotsGranted     Int           @default(1)
+  idempotencyKey   String        @unique
+  
+  createdAt        DateTime      @default(now())
+  confirmedAt      DateTime?
+}
+
+model EphemeralMessage {
+  id               String           @id @default(uuid())
+  commitmentId     String
+  commitment       CrushCommitment  @relation(fields: [commitmentId], references: [id], onDelete: Cascade)
+  senderUserId     String
+  ciphertext       String
+  isEncrypted      Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+}

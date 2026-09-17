@@ -1,0 +1,111 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum StudentStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  SUSPENDED
+}
+
+enum MatchStatus {
+  WAITING_FOR_PAIR
+  MUTUAL_MATCH
+  UNMATCHED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model College {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  shortCode   String   @unique
+  domain      String?
+  city        String
+  state       String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  users       User[]
+
+  @@index([shortCode])
+}
+
+model User {
+  id                   String        @id @default(uuid()) @db.Uuid
+  collegeId            String        @db.Uuid
+  college              College       @relation(fields: [collegeId], references: [id])
+  identityHash         String        @unique @db.VarChar(64)
+  maskedPhone          String        @db.VarChar(20)
+  instagramHash        String?       @unique @db.VarChar(64)
+  maskedInstagram      String?       @db.VarChar(40)
+  verificationStatus   StudentStatus @default(PENDING_VERIFICATION)
+  eduEmail             String?       @unique
+  crushSlotsTotal      Int           @default(3)
+  crushSlotsUsed       Int           @default(0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  
+  commitments          CrushCommitment[]
+  payments             PaymentOrder[]
+
+  @@index([identityHash])
+  @@index([collegeId])
+}
+
+model CrushCommitment {
+  id                   String      @id @default(uuid()) @db.Uuid
+  userId               String      @db.Uuid
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rendezvousToken      String      @db.VarChar(64)
+  directionalHash      String      @unique @db.VarChar(64)
+  maskedTargetHint     String      @db.VarChar(40)
+  status               MatchStatus @default(WAITING_FOR_PAIR)
+  matchedAt            DateTime?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  messages             EphemeralMessage[]
+
+  @@index([rendezvousToken])
+  @@index([userId])
+}
+
+model PaymentOrder {
+  id               String        @id @default(uuid()) @db.Uuid
+  userId           String        @db.Uuid
+  user             User          @relation(fields: [userId], references: [id])
+  orderId          String        @unique
+  paymentId        String?       @unique
+  amountPaise      Int           @default(1000)
+  currency         String        @default("INR")
+  status           PaymentStatus @default(INITIATED)
+  slotsGranted     Int           @default(1)
+  idempotencyKey   String        @unique
+  createdAt        DateTime      @default(now())
+  confirmedAt      DateTime?
+
+  @@index([orderId])
+  @@index([userId])
+}
+
+model EphemeralMessage {
+  id               String           @id @default(uuid()) @db.Uuid
+  commitmentId     String           @db.Uuid
+  commitment       CrushCommitment  @relation(fields: [commitmentId], references: [id], onDelete: Cascade)
+  senderUserId     String           @db.Uuid
+  ciphertext       String
+  isEncrypted      Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+
+  @@index([commitmentId])
+}

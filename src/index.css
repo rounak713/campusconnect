@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+  }
+
+  html, body {
+    background-color: #12110F;
+    color: #E8E1D5;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overscroll-behavior: none;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ─── Design System Tokens ─── */
+:root {
+  /* Core Palette — warm & comfortable */
+  --color-base:       #12110F;
+  --color-surface:    #1C1A18;
+  --color-surface-2:  #242220;
+  --color-border:     rgba(255, 248, 235, 0.07);
+  --color-border-soft:rgba(255, 248, 235, 0.04);
+  --color-text:       #E8E1D5;
+  --color-muted:      #9A9181;
+  --color-subtle:     #635C52;
+
+  /* Brand Accent */
+  --color-purple:     #6F38E8;
+  --color-purple-hover:#5E27D8;
+  --color-purple-muted:rgba(111, 56, 232, 0.15);
+  --color-purple-glow: rgba(111, 56, 232, 0.25);
+
+  /* Semantic */
+  --color-match:      #E86090;
+  --color-verified:   #34D399;
+  --color-waiting:    #FBBF24;
+}
+
+/* ─── Hinge-Style Card ─── */
+.hinge-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  transition: border-color 0.2s ease;
+}
+
+.hinge-card-subtle {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 24px;
+}
+
+/* ─── Hinge-Style Underline Input ─── */
+.hinge-input-line {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  padding: 12px 0;
+  font-size: 1.25rem;
+  color: var(--color-text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.hinge-input-line::placeholder {
+  color: var(--color-subtle);
+}
+
+.hinge-input-line:focus {
+  border-bottom-color: var(--color-purple);
+}
+
+/* ─── Rounded Input ─── */
+.hinge-input-rounded {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hinge-input-rounded:focus {
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 3px var(--color-purple-muted);
+}
+
+/* ─── Primary Button ─── */
+.hinge-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-purple);
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 24px var(--color-purple-glow);
+}
+
+.hinge-btn:hover {
+  background-color: var(--color-purple-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px var(--color-purple-glow);
+}
+
+.hinge-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px var(--color-purple-glow);
+}
+
+.hinge-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Ghost Button ─── */
+.hinge-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  padding: 14px 24px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.hinge-btn-ghost:hover {
+  border-color: var(--color-purple);
+  background: var(--color-purple-muted);
+}
+
+/* ─── Badge ─── */
+.hinge-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 9999px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+}
+
+.hinge-badge-purple {
+  background: var(--color-purple-muted);
+  color: #c4b5fd;
+  border-color: rgba(111, 56, 232, 0.25);
+}
+
+.hinge-badge-green {
+  background: rgba(52, 211, 153, 0.12);
+  color: #6ee7b7;
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+.hinge-badge-pink {
+  background: rgba(232, 96, 144, 0.12);
+  color: #f9a8d4;
+  border-color: rgba(232, 96, 144, 0.2);
+}
+
+/* ─── Typography ─── */
+.editorial-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: #E8E1D5;
+}
+
+.editorial-subheading {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.35;
+  color: #9A9181;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-surface-2); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-purple); }
+
+/* ─── Animations ─── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-fade-up   { animation: fade-up 0.35s ease forwards; }
+.animate-slide-up  { animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-pulse-glow{ animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ─── Divider ─── */
+.hinge-divider {
+  height: 1px;
+  background: var(--color-border-soft);
+  margin: 0;
+}
+
+/* ─── No select ─── */
+.no-select { user-select: none; -webkit-user-select: none; }
+
+/* ─── Safe area padding ─── */
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 16px); }
+.safe-top    { padding-top: max(env(safe-area-inset-top), 0px); }
