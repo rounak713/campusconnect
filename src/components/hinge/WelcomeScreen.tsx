@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck, Lock, Sparkles } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const WelcomeScreen: React.FC<{ onContinue: () => void }> = ({ onContinue }) => {

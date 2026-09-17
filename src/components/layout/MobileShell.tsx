@@ -5,6 +5,8 @@ import { DeckView } from '../hinge/DeckView';
 import { StepCrushEntry } from '../hinge/StepCrushEntry';
 import { HingeMatchesList } from '../match/HingeMatchesList';
 import { HingePrivacyTab } from '../privacy/HingePrivacyTab';
+import { ProfileSettingsScreen } from '../profile/ProfileSettingsScreen';
+import { VerificationScreen } from '../verification/VerificationScreen';
 import { HingeAuthScreen } from '../auth/HingeAuthScreen';
 import { HingePaymentSheet } from '../payment/HingePaymentSheet';
 import { MutualMatchModal } from '../match/MutualMatchModal';
@@ -73,6 +75,8 @@ export const MobileShell: React.FC = () => {
           )}
           {activeTab === 'matches'  && <HingeMatchesList />}
           {activeTab === 'privacy'  && <HingePrivacyTab />}
+          {activeTab === 'profile'  && <ProfileSettingsScreen />}
+          {activeTab === 'verify'   && <VerificationScreen />}
         </main>
 
         {/* Bottom navigation */}

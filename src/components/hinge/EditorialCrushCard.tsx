@@ -5,9 +5,7 @@ import {
   ChevronRight, 
   Phone, 
   Lock, 
-  ShieldCheck, 
-  KeyRound,
-  Heart
+  KeyRound
 } from 'lucide-react';
 import type { CrushEntry } from '../../types';
 import { useApp } from '../../context/AppContext';
