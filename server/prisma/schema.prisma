@@ -17,6 +17,19 @@ model College {
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   users       User[]
+  domains     CollegeDomain[]
+}
+
+// Whitelist of approved Indian college email domains (Method A, zero cost)
+model CollegeDomain {
+  id         String   @id @default(uuid())
+  domain     String   @unique // e.g., "student.du.ac.in", "iitd.ac.in"
+  collegeId  String?
+  college    College? @relation(fields: [collegeId], references: [id])
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([collegeId])
 }
 
 model User {
@@ -35,9 +48,15 @@ model User {
   maskedInstagram      String?
   
   // Verification and access quotas
-  // Statuses: 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED'
+  // Statuses: 'PENDING_VERIFICATION' | 'PENDING_REVIEW' | 'VERIFIED' | 'SUSPENDED' | 'REJECTED'
   verificationStatus   String            @default("PENDING_VERIFICATION")
+  // Methods: 'EMAIL_DOMAIN' | 'MANUAL_ID'
+  verificationMethod   String?
+  verifiedAt           DateTime?
   eduEmail             String?           @unique
+  // Contact address used for manual-review outcome notifications
+  contactEmail         String?
+  isAdmin              Boolean           @default(false)
   crushSlotsTotal      Int               @default(3) // 3 free default slots
   crushSlotsUsed       Int               @default(0)
   
@@ -46,6 +65,51 @@ model User {
   
   commitments          CrushCommitment[]
   payments             PaymentOrder[]
+  emailOtps            EmailOtp[]
+  verificationRequests VerificationRequest[]
+}
+
+// Hashed 6-digit email OTPs (Method A). Raw codes are never persisted.
+model EmailOtp {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  domain     String
+  codeHash   String
+  attempts   Int      @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([email])
+}
+
+// Manual college ID card submissions awaiting admin review (Method B)
+model VerificationRequest {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Private object storage reference; never public. Signed URLs are minted on read.
+  // Providers: 'S3' | 'CLOUDINARY' | 'LOCAL'
+  storageProvider String
+  storageKey      String
+  mimeType        String
+  sizeBytes       Int
+
+  // Statuses: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
+  status          String    @default("PENDING_REVIEW")
+  reviewerId      String?
+  reviewReason    String?
+  reviewedAt      DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 model CrushCommitment {

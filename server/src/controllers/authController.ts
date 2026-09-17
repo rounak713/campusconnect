@@ -101,7 +101,7 @@ export class AuthController {
         identityHash,
         maskedPhone,
         collegeId: targetCollegeId,
-        verificationStatus: 'VERIFIED',
+        verificationStatus: 'PENDING_VERIFICATION',
         crushSlotsTotal: 3,
         crushSlotsUsed: 0
       },

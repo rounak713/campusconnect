@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import dotenv from 'dotenv';
 import { apiRouter } from './routes/api.js';
 
@@ -38,6 +39,11 @@ app.use('/api', apiRouter);
 
 // Global error handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err instanceof multer.MulterError) {
+    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({ error: err.code, message: err.message });
+  }
+
   console.error('Unhandled server error:', err);
   res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: err.message });
 });
