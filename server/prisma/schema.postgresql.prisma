@@ -9,8 +9,27 @@ generator client {
 
 enum StudentStatus {
   PENDING_VERIFICATION
+  PENDING_REVIEW
   VERIFIED
   SUSPENDED
+  REJECTED
+}
+
+enum VerificationMethod {
+  EMAIL_DOMAIN
+  MANUAL_ID
+}
+
+enum VerificationRequestStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum StorageProvider {
+  S3
+  CLOUDINARY
+  LOCAL
 }
 
 enum MatchStatus {
@@ -36,8 +55,20 @@ model College {
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   users       User[]
+  domains     CollegeDomain[]
 
   @@index([shortCode])
+}
+
+model CollegeDomain {
+  id         String   @id @default(uuid()) @db.Uuid
+  domain     String   @unique
+  collegeId  String?  @db.Uuid
+  college    College? @relation(fields: [collegeId], references: [id])
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([collegeId])
 }
 
 model User {
@@ -49,7 +80,11 @@ model User {
   instagramHash        String?       @unique @db.VarChar(64)
   maskedInstagram      String?       @db.VarChar(40)
   verificationStatus   StudentStatus @default(PENDING_VERIFICATION)
+  verificationMethod   VerificationMethod?
+  verifiedAt           DateTime?
   eduEmail             String?       @unique
+  contactEmail         String?
+  isAdmin              Boolean       @default(false)
   crushSlotsTotal      Int           @default(3)
   crushSlotsUsed       Int           @default(0)
   createdAt            DateTime      @default(now())
@@ -57,9 +92,46 @@ model User {
   
   commitments          CrushCommitment[]
   payments             PaymentOrder[]
+  emailOtps            EmailOtp[]
+  verificationRequests VerificationRequest[]
 
   @@index([identityHash])
   @@index([collegeId])
+}
+
+model EmailOtp {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  domain     String
+  codeHash   String    @db.VarChar(64)
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([email])
+}
+
+model VerificationRequest {
+  id              String                    @id @default(uuid()) @db.Uuid
+  userId          String                    @db.Uuid
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storageProvider StorageProvider
+  storageKey      String
+  mimeType        String                    @db.VarChar(64)
+  sizeBytes       Int
+  status          VerificationRequestStatus @default(PENDING_REVIEW)
+  reviewerId      String?                   @db.Uuid
+  reviewReason    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 model CrushCommitment {

@@ -73,7 +73,33 @@ async function main() {
   }
   console.log(`✅ Seeded ${collegesData.length} Indian colleges.`);
 
-  // 2. Seed Demo Students
+  // 2. Seed whitelisted college email domains (Method A)
+  const domainRows = [
+    { domain: 'srcc.du.ac.in', shortCode: 'DU_SRCC' },
+    { domain: 'du.ac.in', shortCode: null },
+    { domain: 'student.du.ac.in', shortCode: null },
+    { domain: 'ststephens.edu', shortCode: 'DU_STEPHENS' },
+    { domain: 'hinducollege.ac.in', shortCode: 'DU_HINDU' },
+    { domain: 'iitd.ac.in', shortCode: 'IIT_DELHI' },
+    { domain: 'iitb.ac.in', shortCode: 'IIT_BOMBAY' },
+    { domain: 'pilani.bits-pilani.ac.in', shortCode: 'BITS_PILANI' },
+    { domain: 'dtu.ac.in', shortCode: 'DTU_DELHI' },
+    { domain: 'nitt.edu', shortCode: 'NIT_TRICHY' }
+  ];
+
+  for (const row of domainRows) {
+    const college = row.shortCode
+      ? await prisma.college.findUnique({ where: { shortCode: row.shortCode } })
+      : null;
+    await prisma.collegeDomain.upsert({
+      where: { domain: row.domain },
+      update: { active: true, collegeId: college?.id ?? null },
+      create: { domain: row.domain, collegeId: college?.id ?? null }
+    });
+  }
+  console.log(`✅ Seeded ${domainRows.length} whitelisted college email domains.`);
+
+  // 3. Seed Demo Students
   const srcc = await prisma.college.findUnique({ where: { shortCode: 'DU_SRCC' } });
   if (!srcc) throw new Error('SRCC not found');
 
@@ -112,6 +138,24 @@ async function main() {
   });
 
   console.log('✅ Seeded demo students with peppered hashes (Student A & Student B).');
+
+  // 4. Seed an admin reviewer for the verification dashboard
+  const adminPhone = process.env.SEED_ADMIN_PHONE || '+919999000001';
+  const adminHash = CampusCryptoService.generateIdentityHash(adminPhone);
+  await prisma.user.upsert({
+    where: { identityHash: adminHash },
+    update: { isAdmin: true },
+    create: {
+      collegeId: srcc.id,
+      identityHash: adminHash,
+      maskedPhone: CampusCryptoService.createMaskedHint(adminPhone, 'phone'),
+      verificationStatus: 'VERIFIED',
+      verificationMethod: 'EMAIL_DOMAIN',
+      verifiedAt: new Date(),
+      isAdmin: true
+    }
+  });
+  console.log(`✅ Seeded admin reviewer (${adminPhone}).`);
   console.log('🎉 Seeding completed successfully!');
 }
 
