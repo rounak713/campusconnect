@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ShieldCheck, QrCode, Smartphone, ArrowRight, Lock, Copy, Check } from 'lucide-react';
+import { X, CheckCircle2, QrCode, ArrowRight, Copy, Check } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const EditorialPaymentSheet: React.FC = () => {

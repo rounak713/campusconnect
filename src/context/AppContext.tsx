@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState } from 'react';
-import type { College, CrushEntry, UserProfile, ChatMessage } from '../types';
+import type {
+  College, CrushEntry, UserProfile, ChatMessage,
+  StudentVerification, VerificationMethod, VerificationStep,
+  PrivacySettings, CampusPass,
+} from '../types';
 import { INDIAN_COLLEGES } from '../data/colleges';
 import { computeSHA256, normalizeIdentityInput, maskIdentity } from '../utils/crypto';
 
@@ -8,8 +12,8 @@ interface AppContextType {
   selectedCollege: College;
   setSelectedCollege: (college: College) => void;
   crushes: CrushEntry[];
-  activeTab: 'crushes' | 'add' | 'matches' | 'privacy';
-  setActiveTab: (tab: 'crushes' | 'add' | 'matches' | 'privacy') => void;
+  activeTab: TabId;
+  setActiveTab: (tab: TabId) => void;
   isPaymentModalOpen: boolean;
   setIsPaymentModalOpen: (open: boolean) => void;
   activeMatchModal: CrushEntry | null;
@@ -31,7 +35,32 @@ interface AppContextType {
   // Mock Chat messages store
   chatMessages: Record<string, ChatMessage[]>;
   sendChatMessage: (matchId: string, text: string) => void;
+
+  // Student verification
+  verification: StudentVerification;
+  setVerificationStep: (step: VerificationStep) => void;
+  confirmPhone: (phone: string) => void;
+  confirmCollege: (college: College) => void;
+  startVerification: (method: VerificationMethod, payload: { collegeEmail?: string; idCardFileName?: string }) => void;
+  completeVerification: () => void;
+  resetVerification: () => void;
+
+  // Privacy & pass
+  privacy: PrivacySettings;
+  togglePrivacy: (key: keyof PrivacySettings) => void;
+  pass: CampusPass;
+  extendPass: () => void;
+  clearEncryptedCache: () => void;
 }
+
+export type TabId = 'crushes' | 'add' | 'matches' | 'privacy' | 'profile' | 'verify';
+
+const INITIAL_VERIFICATION: StudentVerification = {
+  step: 'phone',
+  status: 'unverified',
+  method: null,
+  phoneVerified: false,
+};
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -40,7 +69,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [viewMode, setViewMode] = useState<'mobile-frame' | 'responsive'>('mobile-frame');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [isSetupModalOpen, setIsSetupModalOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'crushes' | 'add' | 'matches' | 'privacy'>('crushes');
+  const [activeTab, setActiveTab] = useState<TabId>('crushes');
   const [activeMatchModal, setActiveMatchModal] = useState<CrushEntry | null>(null);
 
   // Default demo user initialized at DU SRCC
@@ -54,6 +83,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isVerified: true,
     crushSlotsTotal: 3,
     crushSlotsUsed: 2,
+    displayName: 'Midnight Poet',
+    degree: 'B.Com (Hons)',
+    year: '2nd Year',
+    avatarEmoji: '🌙',
+  });
+
+  const [verification, setVerification] = useState<StudentVerification>({
+    step: 'done',
+    status: 'verified',
+    method: 'email',
+    phoneVerified: true,
+    collegeEmail: `student@${INDIAN_COLLEGES[0].emailDomain ?? 'srcc.du.ac.in'}`,
+    verifiedAt: 'Verified this semester',
+  });
+
+  const [privacy, setPrivacy] = useState<PrivacySettings>({
+    ghostMode: false,
+    photoShield: true,
+    contactShield: true,
+  });
+
+  const [pass, setPass] = useState<CampusPass>({
+    isActive: true,
+    label: 'Semester Pass Active',
+    amount: 10,
+    validUntil: '31 Dec 2025',
+    daysLeft: 74,
   });
 
   // Preloaded mock crushes
@@ -124,13 +180,76 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isVerified: true,
       crushSlotsTotal: 3,
       crushSlotsUsed: crushes.length,
+      displayName: 'Midnight Poet',
+      degree: 'B.Com (Hons)',
+      year: '2nd Year',
+      avatarEmoji: '🌙',
     });
+    setVerification(prev => ({ ...prev, phoneVerified: true, step: 'college' }));
     setIsSetupModalOpen(false);
   };
 
   const logout = () => {
     setUser(null);
+    setVerification(INITIAL_VERIFICATION);
     setIsSetupModalOpen(true);
+  };
+
+  const setVerificationStep = (step: VerificationStep) => {
+    setVerification(prev => ({ ...prev, step }));
+  };
+
+  const confirmPhone = (phone: string) => {
+    const digits = phone.replace(/\D/g, '').slice(-10);
+    const masked = digits.length === 10 ? `+91 ${digits.slice(0, 2)}****${digits.slice(-4)}` : '+91 98****3456';
+    setUser(prev => prev ? { ...prev, phone: `+91${digits}`, maskedPhone: masked } : prev);
+    setVerification(prev => ({ ...prev, phoneVerified: true, step: 'college' }));
+  };
+
+  const confirmCollege = (college: College) => {
+    setSelectedCollege(college);
+    setUser(prev => prev ? {
+      ...prev,
+      collegeId: college.id,
+      collegeName: college.name,
+      collegeShortName: college.shortName,
+    } : prev);
+    setVerification(prev => ({ ...prev, step: 'method' }));
+  };
+
+  const startVerification = (
+    method: VerificationMethod,
+    payload: { collegeEmail?: string; idCardFileName?: string },
+  ) => {
+    setVerification(prev => ({
+      ...prev,
+      method,
+      status: 'pending',
+      collegeEmail: payload.collegeEmail ?? prev.collegeEmail,
+      idCardFileName: payload.idCardFileName ?? prev.idCardFileName,
+    }));
+  };
+
+  const completeVerification = () => {
+    setVerification(prev => ({
+      ...prev,
+      status: 'verified',
+      step: 'done',
+      verifiedAt: 'Verified just now',
+    }));
+    setUser(prev => prev ? { ...prev, isVerified: true } : prev);
+  };
+
+  const resetVerification = () => setVerification(INITIAL_VERIFICATION);
+
+  const togglePrivacy = (key: keyof PrivacySettings) => {
+    setPrivacy(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const extendPass = () => setIsPaymentModalOpen(true);
+
+  const clearEncryptedCache = () => {
+    setChatMessages({});
   };
 
   const addCrush = async (rawInput: string): Promise<{ success: boolean; isMatch?: boolean; error?: string }> => {
@@ -199,6 +318,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const completePayment = () => {
     setUser(prev => prev ? { ...prev, crushSlotsTotal: prev.crushSlotsTotal + 1 } : null);
+    setPass(prev => ({
+      ...prev,
+      isActive: true,
+      label: 'Semester Pass Active',
+      daysLeft: prev.daysLeft + 30,
+    }));
     setIsPaymentModalOpen(false);
   };
 
@@ -306,7 +431,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         revealMatch,
         clearChatAndUnmatch,
         chatMessages,
-        sendChatMessage
+        sendChatMessage,
+        verification,
+        setVerificationStep,
+        confirmPhone,
+        confirmCollege,
+        startVerification,
+        completeVerification,
+        resetVerification,
+        privacy,
+        togglePrivacy,
+        pass,
+        extendPass,
+        clearEncryptedCache
       }}
     >
       {children}

@@ -6,6 +6,7 @@ export interface College {
   state: string;
   campusTag: string;
   badgeColor: string;
+  emailDomain?: string;
 }
 
 export interface UserProfile {
@@ -18,6 +19,40 @@ export interface UserProfile {
   isVerified: boolean;
   crushSlotsTotal: number;
   crushSlotsUsed: number;
+  displayName?: string;
+  degree?: string;
+  year?: string;
+  avatarEmoji?: string;
+}
+
+export type VerificationMethod = 'email' | 'id_card';
+
+export type VerificationStep = 'phone' | 'college' | 'method' | 'done';
+
+export type VerificationStatus = 'unverified' | 'pending' | 'verified';
+
+export interface StudentVerification {
+  step: VerificationStep;
+  status: VerificationStatus;
+  method: VerificationMethod | null;
+  phoneVerified: boolean;
+  collegeEmail?: string;
+  idCardFileName?: string;
+  verifiedAt?: string;
+}
+
+export interface PrivacySettings {
+  ghostMode: boolean;
+  photoShield: boolean;
+  contactShield: boolean;
+}
+
+export interface CampusPass {
+  isActive: boolean;
+  label: string;
+  amount: number;
+  validUntil: string;
+  daysLeft: number;
 }
 
 export type CrushStatus = 'waiting' | 'mutual_match';

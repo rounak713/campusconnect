@@ -3,10 +3,8 @@ import {
   ArrowRight, 
   Lock, 
   ShieldCheck, 
-  Cpu, 
   Check, 
   AlertCircle, 
-  X,
   CreditCard
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -17,7 +15,7 @@ export const StepCrushEntry: React.FC<{ onDone?: () => void }> = ({ onDone }) =>
   const [inputVal, setInputVal] = useState('');
   const [activeHash, setActiveHash] = useState('');
   const [maskedPreview, setMaskedPreview] = useState('');
-  const [detectedType, setDetectedType] = useState<'instagram' | 'phone'>('instagram');
+  const [, setDetectedType] = useState<'instagram' | 'phone'>('instagram');
   const [showWhyHashModal, setShowWhyHashModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -224,3 +222,4 @@ export const StepCrushEntry: React.FC<{ onDone?: () => void }> = ({ onDone }) =>
     </div>
   );
 };
+

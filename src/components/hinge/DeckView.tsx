@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, CreditCard, Sparkles, Shield, Lock, GraduationCap } from 'lucide-react';
+import { Plus, CreditCard, Lock, GraduationCap } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { EditorialCrushCard } from './EditorialCrushCard';
 

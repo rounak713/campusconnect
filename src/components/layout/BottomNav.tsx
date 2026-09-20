@@ -1,24 +1,27 @@
 import React from 'react';
-import { Lock, Plus, Heart, ShieldCheck } from 'lucide-react';
+import { Lock, Plus, Heart, ShieldCheck, User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 const tabs = [
-  { id: 'crushes' as const, label: 'Vault',    icon: Lock,        activeColor: 'text-[#6F38E8]' },
-  { id: 'add'     as const, label: 'Add',       icon: Plus,        activeColor: 'text-[#6F38E8]', special: true },
-  { id: 'matches' as const, label: 'Matches',   icon: Heart,       activeColor: 'text-[#E86090]' },
-  { id: 'privacy' as const, label: 'Privacy',   icon: ShieldCheck, activeColor: 'text-emerald-400' },
+  { id: 'crushes' as const, label: 'Crushes', icon: Lock,        activeColor: 'text-[#8B5CF6]', indicator: 'bg-[#8B5CF6]' },
+  { id: 'add'     as const, label: 'Add',     icon: Plus,        activeColor: 'text-[#8B5CF6]', indicator: 'bg-[#8B5CF6]', special: true },
+  { id: 'matches' as const, label: 'Matches', icon: Heart,       activeColor: 'text-[#E86090]', indicator: 'bg-[#E86090]' },
+  { id: 'profile' as const, label: 'Profile', icon: User,        activeColor: 'text-[#06B6D4]', indicator: 'bg-[#06B6D4]' },
+  { id: 'verify'  as const, label: 'Verify',  icon: ShieldCheck, activeColor: 'text-[#10B981]', indicator: 'bg-[#10B981]' },
 ];
 
 export const BottomNav: React.FC = () => {
-  const { activeTab, setActiveTab, crushes } = useApp();
+  const { activeTab, setActiveTab, crushes, verification } = useApp();
   const matchCount = crushes.filter(c => c.status === 'mutual_match').length;
+  const needsVerification = verification.status !== 'verified';
 
   return (
     <nav className="shrink-0 border-t border-white/[0.05] bg-noir-900/95 backdrop-blur-xl safe-bottom">
-      <div className="grid grid-cols-4 px-2 py-1">
-        {tabs.map(({ id, label, icon: Icon, activeColor, special }) => {
+      <div className="grid grid-cols-5 px-1 py-1">
+        {tabs.map(({ id, label, icon: Icon, activeColor, indicator, special }) => {
           const isActive = activeTab === id;
           const showBadge = id === 'matches' && matchCount > 0;
+          const showDot = id === 'verify' && needsVerification;
 
           if (special) {
             return (
@@ -29,12 +32,12 @@ export const BottomNav: React.FC = () => {
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
                   isActive
-                    ? 'bg-[#6F38E8] shadow-glow-sm-violet'
-                    : 'bg-[#6F38E8]/15 border border-[#6F38E8]/30'
+                    ? 'bg-gradient-to-br from-[#8B5CF6] to-[#06B6D4] shadow-glow-sm-violet'
+                    : 'bg-[#8B5CF6]/15 border border-[#8B5CF6]/30'
                 }`}>
-                  <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-[#6F38E8]'}`} strokeWidth={isActive ? 2.5 : 2} />
+                  <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-[#8B5CF6]'}`} strokeWidth={isActive ? 2.5 : 2} />
                 </div>
-                <span className={`text-[10px] font-semibold transition-colors ${isActive ? 'text-[#6F38E8]' : 'text-zinc-600'}`}>
+                <span className={`text-[10px] font-semibold transition-colors ${isActive ? 'text-[#8B5CF6]' : 'text-zinc-600'}`}>
                   {label}
                 </span>
               </button>
@@ -57,14 +60,15 @@ export const BottomNav: React.FC = () => {
                     {matchCount}
                   </span>
                 )}
+                {showDot && (
+                  <span className="absolute -top-1 -right-1.5 w-2 h-2 rounded-full bg-amber-400 animate-pulse-glow" />
+                )}
               </div>
               <span className={`text-[10px] font-semibold transition-colors ${isActive ? activeColor : 'text-zinc-600'}`}>
                 {label}
               </span>
               {isActive && (
-                <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full ${
-                  id === 'matches' ? 'bg-[#E86090]' : id === 'privacy' ? 'bg-emerald-400' : 'bg-[#6F38E8]'
-                }`} />
+                <span className={`absolute top-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full ${indicator}`} />
               )}
             </button>
           );
